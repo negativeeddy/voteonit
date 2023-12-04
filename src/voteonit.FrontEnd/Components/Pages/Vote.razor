@@ -1,0 +1,30 @@
+﻿@page "/vote/{PollId:int}"
+@using VoteOnIt.FrontEnd.Services
+@inject IPollService pollService
+
+@if (Poll is not null)
+{
+    <h3>Vote on poll <b>@Poll.Name</b></h3>
+    <h2>Options:</h2>
+    <ul>
+    </ul>
+
+}
+else
+{
+    <h3>no such poll found</h3>
+}
+
+@code {
+    [Parameter]
+    public int PollId { get; set; }
+
+    public PollInfo? Poll { get; set; }
+    public Ballot? Ballot { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Poll = (await pollService.GetPolls()).Single(p => p.Id == PollId);
+        await base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,54 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.OutputCaching
+@using VoteOnIt.BlazorFrontEnd.Services
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject IPollService pollService
+@attribute [StreamRendering(true)]
+@attribute [OutputCache(Duration = 5)]
+@rendermode InteractiveServer
+
+<h3>All your polls!</h3>
+
+@if (polls is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <QuickGrid Items="@polls" TGridItem="PollData">
+        <TemplateColumn Title="Poll Name" TGridItem="PollData" Sortable="true" SortBy="sortByName">
+            <a href="/polls/@context.Id">@context.Name</a>
+        </TemplateColumn>
+        <PropertyColumn Property="@(p => p.Ballot.Method)" Sortable="true" />
+        <TemplateColumn Title="Options" TGridItem="PollData">
+            <ul>
+                @foreach (var item in @context.Ballot.Options)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </TemplateColumn>
+        <TemplateColumn Title="Vote Now!">
+            <a href="@GetQRCodeLin(context)">
+                <img src="/qr?link=@GetQRCodeLin(context)" style="height:50px" />
+            </a>
+        </TemplateColumn>
+
+    </QuickGrid>
+}
+
+
+@code {
+    GridSort<PollData> sortByName = GridSort<PollData>
+     .ByAscending(p => p.Name);
+
+    private IQueryable<PollData>? polls;
+
+    protected override async Task OnInitializedAsync()
+    {
+        polls = (await pollService.GetPolls()).AsQueryable();
+        await base.OnInitializedAsync();
+    }
+
+    string GetQRCodeLin(PollData poll) => $"/polls/{poll.Id}/vote/";
+}

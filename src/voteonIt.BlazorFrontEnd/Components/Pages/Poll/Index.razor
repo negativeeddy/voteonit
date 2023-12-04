@@ -1,0 +1,42 @@
+﻿@page "/polls/{Id:int}"
+@using VoteOnIt.BlazorFrontEnd.Services
+@inject IPollService PollService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+
+@if (pollInfo is null)
+{
+    <h3>Poll @Id - Loading...</h3>
+}
+else
+{
+    <h3>Poll @Id - @pollInfo.Name  (<a href="/polls/@Id/edit">edit</a>)</h3>
+
+    <p><strong>State:</strong> @pollInfo.State</p>
+
+    <p><strong>Ballot Method:</strong> @pollInfo.Ballot.Method</p>
+
+    <p><strong>Options</strong></p>
+    @if (pollInfo.Ballot.Options != null)
+    {
+        <ul>
+            @foreach (var option in pollInfo.Ballot.Options)
+            {
+                <li>@option</li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PollData? pollInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pollInfo = await PollService.GetPoll(Id);
+    }
+}

@@ -1,0 +1,68 @@
+﻿@page "/polls/{Id:int}/vote"
+@using System.ComponentModel.DataAnnotations
+@using VoteOnIt.BlazorFrontEnd.Services
+@inject IPollService pollService
+@rendermode InteractiveServer
+
+
+@if (poll is not null)
+{
+    if (VotingMessage is not null)
+    {
+        <h1>You voted for @VotingMessage!</h1>
+    }
+
+    <h3>Vote on poll <b>@poll.Name</b></h3>
+    <h2>Options:</h2>
+    <ul>
+    </ul>
+
+    <EditForm Model="model" OnValidSubmit="HandleValidSubmit" FormName="vote">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <p>Select an option:</p>
+        <InputRadioGroup @bind-Value="@model.SelectedOption">
+            Option:
+            <br>
+            @foreach (var option in poll.Ballot.Options)
+            {
+                <InputRadio Value="option" />
+                @option
+                <br>
+            }
+        </InputRadioGroup>
+        <button type="submit">Vote</button>
+    </EditForm>
+}
+else
+{
+    <h3>Loading...</h3>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PollData? poll { get; set; }
+
+    private VotingModel model = new();
+
+    private string? VotingMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        poll = await pollService.GetPoll(Id);
+        await base.OnInitializedAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        VotingMessage = model.SelectedOption;
+    }
+
+    public class VotingModel
+    {
+        [Required(ErrorMessage="You must pick one of the options.")]
+        public string? SelectedOption { get; set; }
+    }
+}
