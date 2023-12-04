@@ -1,0 +1,96 @@
+﻿@page "/polls/create"
+@using System.ComponentModel.DataAnnotations
+@using VoteOnIt.BlazorFrontEnd.Services
+@inject IPollService PollService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Create a new poll</h3>
+<EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="Name">Name:</label>
+        <InputText id="Name" @bind-Value="model.Name" />
+    </div>
+
+    <div class="form-group">
+        <label for="BallotMethod">Ballot Method:</label>
+        <InputText id="BallotMethod" @bind-Value="model.BallotMethod" />
+    </div>
+    <div>
+        <label for="BallotOptions">Options:</label>
+        @if (model.BallotOptions is not null)
+        {
+            for (var i = 0; i < model.BallotOptions.Count; i++)
+            {
+                var index = i;  // local copy to capture the variable in the lambda
+                <div>
+                    <InputText @bind-Value="model.BallotOptions[index]" />
+                    <button type="button" disabled="@(index <= 0)" @onclick="() => MoveEntryUp(index)">🔼</button>
+                    <button type="button" disabled="@(index >= model.BallotOptions.Count - 1)" @onclick="() => MoveEntryDown(index)">🔽</button>
+                    <button type="button" @onclick="() => RemoveEntry(index)">🗑️</button>
+                </div>
+            }
+        }
+        <button type="button" @onclick="AddEntry">➕</button>
+    </div>
+    <div>
+        <button type="submit">Save</button>
+        <button type="button" @onclick="HandleCancel">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    private PollEditForm? model = new PollEditForm()
+        {
+            BallotOptions = new List<string>() { string.Empty, string.Empty }
+        };
+
+    private void AddEntry() => model.BallotOptions.Add(string.Empty);
+
+    private void RemoveEntry(int index) => model.BallotOptions.RemoveAt(index);
+
+    private async Task HandleValidSubmit()
+    {
+        var poll = await PollService.AddPoll(model.Name, model.BallotMethod, model.BallotOptions);
+        NavigationManager.NavigateTo($"/polls/{poll.Id}");
+    }
+
+    private void HandleCancel()
+    {
+        NavigationManager.NavigateTo($"/");
+    }
+
+    private void MoveEntryUp(int index)
+    {
+        if (model is not null && index > 0)
+        {
+            var item = model.BallotOptions[index];
+            model.BallotOptions.RemoveAt(index);
+            model.BallotOptions.Insert(index - 1, item);
+        }
+    }
+
+    private void MoveEntryDown(int index)
+    {
+        if (model is not null && index < model.BallotOptions.Count - 1)
+        {
+            var item = model.BallotOptions[index];
+            model.BallotOptions.RemoveAt(index);
+            model.BallotOptions.Insert(index + 1, item);
+        }
+    }
+
+    public class PollEditForm
+    {
+        public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public string BallotMethod { get; set; }
+        [MinLength(2)]
+        public IList<string>? BallotOptions { get; set; }
+    }
+}

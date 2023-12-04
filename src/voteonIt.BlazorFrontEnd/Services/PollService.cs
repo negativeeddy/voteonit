@@ -1,19 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace VoteOnIt.BlazorFrontEnd.Services;
-
-public interface IPollService
-{
-    Task<IList<PollData>> GetPolls();
-    Task<PollData?> GetPoll(int id);
-    Task UpdatePoll(PollUpdateData pollData);
-    public int AddPoll(PollUpdateData pollData);
-}
-
-public record Ballot(string Method, IList<string> Options);
-
-public record PollData(int Id, string Name, Ballot Ballot, string State);
-public record PollUpdateData(int Id, string Name, Ballot Ballot);
+﻿namespace VoteOnIt.BlazorFrontEnd.Services;
 
 public class PollServiceApi : IPollService
 {
@@ -47,6 +32,23 @@ public class PollServiceApi : IPollService
     {
         var client = _httpClientFactory.CreateClient(nameof(PollServiceApi));
         var response = await client.PutAsJsonAsync($"polls/{pollData.Id}", pollData, CancellationToken.None);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<PollData> AddPoll(string name, string ballotMethod, IList<string> options)
+    {
+        PollCreateData poll = new PollCreateData(name, new Ballot(ballotMethod, options));
+        var client = _httpClientFactory.CreateClient(nameof(PollServiceApi));
+        var response = await client.PostAsJsonAsync("polls", poll, CancellationToken.None);
+        response.EnsureSuccessStatusCode();
+        var newPoll = await response.Content.ReadFromJsonAsync<PollData>();
+        return newPoll;
+    }
+
+    public async Task DeletePoll(int id)
+    {
+        var client = _httpClientFactory.CreateClient(nameof(PollServiceApi));
+        var response = await client.DeleteAsync($"polls/{id}", CancellationToken.None);
         response.EnsureSuccessStatusCode();
     }
 }

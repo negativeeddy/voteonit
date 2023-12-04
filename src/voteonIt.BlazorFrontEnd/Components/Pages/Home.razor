@@ -15,6 +15,7 @@
 }
 else
 {
+    <a href="/polls/create">Add Poll</a>
     <QuickGrid Items="@polls" TGridItem="PollData">
         <TemplateColumn Title="Poll Name" TGridItem="PollData" Sortable="true" SortBy="sortByName">
             <a href="/polls/@context.Id">@context.Name</a>

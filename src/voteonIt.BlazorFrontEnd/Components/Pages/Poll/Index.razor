@@ -2,6 +2,7 @@
 @using VoteOnIt.BlazorFrontEnd.Services
 @inject IPollService PollService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 @rendermode InteractiveServer
 
 
@@ -17,6 +18,8 @@ else
 
     <p><strong>Ballot Method:</strong> @pollInfo.Ballot.Method</p>
 
+    <div>
+
     <p><strong>Options</strong></p>
     @if (pollInfo.Ballot.Options != null)
     {
@@ -27,6 +30,7 @@ else
             }
         </ul>
     }
+    </div>    
 }
 
 @code {

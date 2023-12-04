@@ -3,6 +3,7 @@
 @using VoteOnIt.BlazorFrontEnd.Services
 @inject IPollService PollService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 @rendermode InteractiveServer
 
 <h3>Update Poll @Id</h3>
@@ -37,16 +38,18 @@ else
                         <InputText @bind-Value="model.BallotOptions[index]" />
                         <button type="button" disabled="@(index <= 0)" @onclick="() => MoveEntryUp(index)">🔼</button>
                         <button type="button" disabled="@(index >= model.BallotOptions.Count - 1)" @onclick="() => MoveEntryDown(index)">🔽</button>
-                        <button type="button" @onclick="() => RemoveEntry(index)">❌</button>
+                        <button type="button" @onclick="() => RemoveEntry(index)">🗑️</button>
                     </div>
                 }
             }
-            <button type="button" @onclick="AddEntry">Add Entry</button>
+            <button type="button" @onclick="AddEntry">➕</button>
         </div>
         <div>
             <button type="submit">Save</button>
             <button type="button" @onclick="HandleResetForm">Reset</button>
             <button type="button" @onclick="HandleCancel">Cancel</button>
+            <br/>
+            <button type="button" @onclick="HandleDelete">Delete</button>
         </div>
     </EditForm>
 }
@@ -70,14 +73,34 @@ else
 
     private async Task HandleValidSubmit()
     {
-        await PollService.UpdatePoll(new PollUpdateData(Id, model.Name, new Ballot(model.BallotMethod, model.BallotOptions)));
-        NavigationManager.NavigateTo($"/polls/{Id}");
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "SAVE: Are you sure?");
+        if (confirmed)
+        {
+            await PollService.UpdatePoll(new PollUpdateData(Id, model.Name, new Ballot(model.BallotMethod, model.BallotOptions)));
+            NavigationManager.NavigateTo($"/polls/{Id}");
+        }
     }
 
-    private void HandleCancel()
+    private async Task HandleCancel()
     {
-        NavigationManager.NavigateTo($"/polls/{Id}");
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "CANCEL: Are you sure?");
+        if (confirmed)
+        {
+            NavigationManager.NavigateTo($"/polls/{Id}");
+        }
     }
+
+    // invoke the delete method
+    private async Task HandleDelete()
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "DELETE: Are you sure?");
+        if (confirmed)
+        {
+            await PollService.DeletePoll(Id);
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
 
     private void MoveEntryUp(int index)
     {
