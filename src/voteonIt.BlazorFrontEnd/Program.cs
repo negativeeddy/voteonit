@@ -15,7 +15,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<IPollService, PollServiceApi>();
 builder.Services.AddOutputCache();
 
-builder.Services.AddHttpClient<PollServiceApi>(client => client.BaseAddress = new("http://pollApiService"));
+builder.Services.AddHttpClient<PollServiceApi>(client => client.BaseAddress = new("http://poll-api-service"));
 
 
 var app = builder.Build();
