@@ -83,7 +83,7 @@ internal static class PollInfoEndpoints
         return TypedResults.Ok(dto);
     }
 
-    internal static async Task<IResult> CreatePoll(PollUpdateDto newModel, IPollService svc, IUserProfileService user)
+    internal static async Task<IResult> CreatePoll(PollCreateDto newModel, IPollService svc, IUserProfileService user)
     {
         int userId = user.GetCurrentUser().UserId;
         var poll = await svc.AddPoll(newModel.Name, newModel.Ballot.Method, newModel.Ballot.Options, "Created", userId);
