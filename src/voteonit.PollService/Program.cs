@@ -19,13 +19,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    var svc = app.Services.GetRequiredService<IPollService>();
-    await svc.AddPoll("Movie Night", "Basic", ["Toy Story", "Batman", "E.T.", "Star Wars"], "Created", 0);
-    await svc.AddPoll("Game Night", "Basic", ["Monopoly", "Risk", "Settlers of Catan", "Carcassonne"], "Created", 0);
-    await svc.AddPoll("Dinner Options", "Basic", ["Whataburger", "Ruth's Chris", "Jason's Deli"], "Created", 0);
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    var svc = app.Services.GetRequiredService<IPollService>();
+//    await svc.AddPoll("Movie Night", "Basic", ["Toy Story", "Batman", "E.T.", "Star Wars"], "Created", 0);
+//    await svc.AddPoll("Game Night", "Basic", ["Monopoly", "Risk", "Settlers of Catan", "Carcassonne"], "Created", 0);
+//    await svc.AddPoll("Dinner Options", "Basic", ["Whataburger", "Ruth's Chris", "Jason's Deli"], "Created", 0);
+//}
 
 app.UseExceptionHandler();
 app.MapDefaultEndpoints();
